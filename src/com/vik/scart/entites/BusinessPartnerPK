@@ -1,0 +1,25 @@
+package com.infy.jcart.entites;
+
+import java.io.Serializable;
+
+import javax.persistence.Embeddable;
+
+@Embeddable
+public class BusinessPartnerPK implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
+	private String requestfrom;
+	private String requestto;
+	public String getRequestfrom() {
+		return requestfrom;
+	}
+	public void setRequestfrom(String requestfrom) {
+		this.requestfrom = requestfrom;
+	}
+	public String getRequestto() {
+		return requestto;
+	}
+	public void setRequestto(String requestto) {
+		this.requestto = requestto;
+	}
+}
