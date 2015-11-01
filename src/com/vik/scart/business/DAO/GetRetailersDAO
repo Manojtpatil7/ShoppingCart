@@ -1,0 +1,15 @@
+package com.infy.jcart.dao;
+
+import java.util.List;
+
+import com.infy.jcart.beans.ProductDetails;
+import com.infy.jcart.beans.Registration;
+
+//made by vikram.mandal
+public interface GetRetailersDAO {
+	
+	public List<Registration> getRetailers() throws Exception;
+	public List<ProductDetails> getRetailerProducts(String retailerId) throws Exception;
+	
+	
+}
