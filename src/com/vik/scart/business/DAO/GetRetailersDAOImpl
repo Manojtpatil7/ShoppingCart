@@ -1,0 +1,177 @@
+package com.infy.jcart.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import com.infy.jcart.beans.ProductDetails;
+import com.infy.jcart.beans.Registration;
+import com.infy.jcart.entites.BagsEntity;
+import com.infy.jcart.entites.BooksEntity;
+import com.infy.jcart.entites.CameraEntity;
+import com.infy.jcart.entites.ClothingEntity;
+import com.infy.jcart.entites.ComputersEntity;
+import com.infy.jcart.entites.FootWearEntity;
+import com.infy.jcart.entites.MobileEntity;
+import com.infy.jcart.entites.NewProductsEntity;
+import com.infy.jcart.entites.RegistrationEntity;
+import com.infy.jcart.entites.TelevisionEntity;
+import com.infy.jcart.resources.HibernateUtility;
+import com.infy.jcart.resources.JCartLogger;
+
+public class GetRetailersDAOImpl implements GetRetailersDAO{
+	
+	private SessionFactory sessionFactory = HibernateUtility.getSessionFactory();
+	
+	@Override
+	public List<Registration> getRetailers() throws Exception{
+
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		List<Registration> list = new ArrayList<Registration>();
+		
+		try {
+			
+			Query q = session
+					.createQuery("select r from RegistrationEntity r "
+							+"where r.userId in (select l.userId from LoginEntity l "
+									+ "where l.role='R')");
+
+			@SuppressWarnings("unchecked")
+			List<RegistrationEntity> l = q.list();
+			for (int i = 0; i < l.size(); i++) {
+				RegistrationEntity entity = l.get(i);
+				Registration to = new Registration();
+				to.setDob(entity.getDob());
+				to.setFirstName(entity.getFirstName());
+				to.setLastName(entity.getLastName());
+				to.setMessageService(entity.getMessageService());
+				to.setPermanentAddress(entity.getPermanentAddress());
+				to.setPhoneNumber(entity.getPhoneNumber());
+				to.setRegistrationId(entity.getRegistrationId());
+				to.setSecurityAnswer(entity.getSecurityAnswer());
+				to.setSecurityQuestion(entity.getSecurityQuestion());
+				to.setShipmentAddress(entity.getShipmentAddress());
+				to.setUserId(entity.getUserId());
+				to.setGender(entity.getGender());
+
+				list.add(to);
+			}
+			session.getTransaction().commit();
+			//System.out.println(list);
+			return list;
+		}
+
+		catch (Exception exception) {
+			JCartLogger.logError(this.getClass().getName(),
+					"getRetailers", exception.getMessage());
+			//exception.printStackTrace();
+			throw new Exception("DAO.TECHNICAL_ERROR");
+		} finally {
+			session.close();
+			 
+		}
+		
+	}
+	
+	
+	
+	@SuppressWarnings("rawtypes")
+	public List<ProductDetails> getRetailerProducts(String retailerId)
+			throws Exception {
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		List<ProductDetails> toList = new ArrayList<ProductDetails>();
+		try {
+			Query query = session
+					.createQuery("select p.productId,p.productType,p.sellerId,c.categoryName,s.subCategoryName from"
+							+ " ProductEntity p,CategoryEntity c,SubCategoryEntity s where"
+							+ " p.sellerId=? and p.categoryId=c.categoryId and p.subCategory=s.subCategoryId and p.productType=?");
+			query.setParameter(0, retailerId);
+			query.setParameter(1, 'N');
+			List list = query.list();
+			for (Object obj : list) {
+				Object[] obj1 = (Object[]) obj;
+				ProductDetails to = new ProductDetails();
+				to.setProductId((Integer) obj1[0]);
+				to.setCategory((String) obj1[3]);
+				to.setSubcategory((String) obj1[4]);
+
+				// Populate New Product Details
+
+				BagsEntity entity1 = (BagsEntity) session.get(BagsEntity.class,
+						(Integer) obj1[0]);
+				if (entity1 != null){
+					to.setProductName(entity1.getProductName());
+					to.setCompany(entity1.getCompany());
+				}	
+				BooksEntity entity2 = (BooksEntity) session.get(BooksEntity.class,
+						(Integer) obj1[0]);
+				if (entity2 != null){
+					to.setProductName(entity2.getProductName());
+					to.setCompany(entity2.getPublisher());
+				}
+				CameraEntity entity3 = (CameraEntity) session.get(CameraEntity.class,
+						(Integer) obj1[0]);
+				if (entity3 != null){
+					to.setProductName(entity3.getProductName());
+					to.setCompany(entity3.getCompany());
+				}	
+				ClothingEntity entity4 = (ClothingEntity) session.get(ClothingEntity.class,
+						(Integer) obj1[0]);
+				if (entity4 != null){
+					to.setProductName(entity4.getProductName());
+					to.setCompany(entity4.getCompany());
+				}	
+				ComputersEntity entity5 = (ComputersEntity) session.get(ComputersEntity.class,
+						(Integer) obj1[0]);
+				if (entity5 != null){
+					to.setProductName(entity5.getProductName());
+					to.setCompany(entity5.getCompany());
+				}	
+				FootWearEntity entity6 = (FootWearEntity) session.get(FootWearEntity.class,
+						(Integer) obj1[0]);
+				if (entity6 != null){
+					to.setProductName(entity6.getProductName());
+					to.setCompany(entity6.getCompany());
+				}	
+				MobileEntity entity7 = (MobileEntity) session.get(MobileEntity.class,
+						(Integer) obj1[0]);
+				if (entity7 != null){
+					to.setProductName(entity7.getProductName());
+					to.setCompany(entity7.getCompany());
+				}	
+				TelevisionEntity entity8 = (TelevisionEntity) session.get(TelevisionEntity.class,
+						(Integer) obj1[0]);
+				if (entity8 != null){
+					to.setProductName(entity8.getProductName());
+					to.setCompany(entity8.getCompany());
+				}	
+				NewProductsEntity newProduct = (NewProductsEntity) session.get(NewProductsEntity.class,
+						(Integer) obj1[0]);
+				if (newProduct != null) {
+					to.setPrice(newProduct.getPrice());
+				}
+				toList.add(to);
+			}
+			session.getTransaction().commit();
+			
+		}
+		catch (Exception exception) {
+			JCartLogger.logError(this.getClass().getName(), "getRetailerProducts",
+					exception.getMessage());
+			throw new Exception("DAO.TECHNICAL_ERROR");
+		} finally {
+		
+			session.close(); 
+		}
+		return toList;
+	}
+	
+	
+	
+	
+}
