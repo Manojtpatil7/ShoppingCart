@@ -1,0 +1,79 @@
+package com.infy.jcart.dao;
+
+import java.util.Calendar;
+
+import org.hibernate.Session;
+
+import com.infy.jcart.entites.BusinessPartnerEntity;
+import com.infy.jcart.entites.BusinessPartnerPK;
+import com.infy.jcart.resources.HibernateUtility;
+import com.infy.jcart.resources.JCartLogger;
+
+import org.hibernate.SessionFactory;
+
+
+
+public class BusinessPartnerDAOImpl implements BusinessPartnerDAO{
+	
+	private SessionFactory sessionFactory = HibernateUtility.getSessionFactory();
+	
+	@Override
+	public void sendRequest(String sender, String receiver) throws Exception {
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		
+		try {
+				BusinessPartnerPK businessPartnerPK = new BusinessPartnerPK();
+				businessPartnerPK.setRequestfrom(sender);
+				businessPartnerPK.setRequestto(receiver);
+				BusinessPartnerEntity businessPartnerEntity = new BusinessPartnerEntity();
+				businessPartnerEntity.setBusinessPartnerPK(businessPartnerPK);
+				businessPartnerEntity.setRequestdate(Calendar.getInstance());
+				businessPartnerEntity.setResponsedate(null);
+				businessPartnerEntity.setStatus("P");
+				businessPartnerEntity.setComments("Want to be a business partner!!");
+
+				session.save(businessPartnerEntity);
+				session.getTransaction().commit();
+			}
+		
+			catch (Exception exception) {
+			JCartLogger.logError(this.getClass().getName(),
+					"sendRequest", exception.getMessage());
+			//exception.printStackTrace();
+			throw new Exception("DAO.TECHNICAL_ERROR");
+			} finally {
+				session.close();
+			 
+		}
+		
+	}
+
+	@Override
+	public Boolean getSentRequest(String sender, String receiver) throws Exception {
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		Boolean ret = false;
+		try {	
+			
+				BusinessPartnerPK businessPartnerPK = new BusinessPartnerPK();
+				businessPartnerPK.setRequestfrom(sender);
+				businessPartnerPK.setRequestto(receiver);
+				BusinessPartnerEntity businessPartnerEntity = (BusinessPartnerEntity) session.get(BusinessPartnerEntity.class, businessPartnerPK);
+				if(businessPartnerEntity != null)
+					ret = true;
+			}
+		
+			catch (Exception exception) {
+			JCartLogger.logError(this.getClass().getName(),
+					"getSentRequest", exception.getMessage());
+			exception.printStackTrace();
+			throw new Exception("DAO.TECHNICAL_ERROR");
+			} finally {
+				session.close();
+			 
+		}
+		return ret;
+	}
+
+}
