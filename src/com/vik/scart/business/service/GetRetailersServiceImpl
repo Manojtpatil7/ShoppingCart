@@ -1,0 +1,49 @@
+package com.infy.jcart.business.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.infy.jcart.beans.ProductDetails;
+import com.infy.jcart.beans.Registration;
+import com.infy.jcart.resources.Factory;
+import com.infy.jcart.resources.JCartLogger;
+
+public class GetRetailersServiceImpl implements GetRetailersService{
+	public List<Registration> getAllRetailers() {
+		List<Registration> list = new ArrayList<Registration>();
+			try {
+				 list = Factory.createGetRetailersDAO().getRetailers();
+				if (list.isEmpty()) {
+					throw new Exception("GetRetailersService.NO_RETAILERS_FOUND");
+				}
+			}  catch (Exception exception) {
+				JCartLogger.logError(this.getClass().getName(), "getRetailersServiceImpl",
+						exception.getMessage());
+				//throw exception;
+			}
+			
+		//	System.out.println(list);
+			
+			return list;
+	}
+	
+	
+	public List<ProductDetails> getRetailerProducts(String retailerId)
+			throws Exception {
+		try {
+			
+			List<ProductDetails> list=Factory.createGetRetailersDAO().getRetailerProducts(retailerId);
+			if(list.size()==0)
+				throw new Exception("GetRetailersService.NO_PRODUCTS_AVAILABLE");
+			else
+				return list;
+		} catch (Exception exception) {
+			JCartLogger.logError(this.getClass().getName(), "getRetailersServiceImpl",
+					exception.getMessage());
+			throw exception;
+		}
+	}
+	
+	
+	
+}
