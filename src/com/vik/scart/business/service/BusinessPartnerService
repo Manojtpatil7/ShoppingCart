@@ -1,0 +1,7 @@
+package com.infy.jcart.business.service;
+
+public interface BusinessPartnerService {
+	public void sendBusinessRequest(String sender, String receiver) throws Exception;
+	public String getBusinessRequest(String sender,String receiver) throws Exception;
+	public Boolean receivedRequests(String receiver,String sender) throws Exception;
+}
