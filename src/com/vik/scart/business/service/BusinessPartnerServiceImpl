@@ -1,0 +1,61 @@
+package com.infy.jcart.business.service;
+import com.infy.jcart.resources.Factory;
+import com.infy.jcart.resources.JCartLogger;
+
+public class BusinessPartnerServiceImpl implements BusinessPartnerService{
+	
+	public void sendBusinessRequest(String sender, String receiver) throws Exception{
+		try {
+			Boolean result =Factory.createBusinessPartnerDAO().getSentRequest(sender, receiver);
+			if(!result)
+				Factory.createBusinessPartnerDAO().sendRequest(sender, receiver);
+			else
+				throw new Exception("BusinessPartnerService.ALREADY_SENT_REQUEST");
+			
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			JCartLogger.logError(this.getClass().getName(), "sendBusinessRequest",
+					exception.getMessage());
+			throw exception;
+		}
+		
+		
+		
+	}
+	
+	/*checks for the received requests for 
+	 * the current user*/
+	
+	
+	public Boolean receivedRequests(String receiver,String sender) throws Exception{
+			
+		Boolean result = false;
+		
+		try {
+			result =Factory.createBusinessPartnerDAO().getSentRequest(sender, receiver);
+			if(result)
+				throw new Exception("BusinessPartnerService.ALREADY_RECEIVED_REQUEST");
+				
+			
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			JCartLogger.logError(this.getClass().getName(), "receivedRequests",
+					exception.getMessage());
+			throw exception;
+		}
+		return result;
+		
+		
+	}
+	
+	
+	
+	
+
+	@Override
+	public String getBusinessRequest(String sender,String receiver) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+}
