@@ -1,0 +1,11 @@
+package com.infy.jcart.dao;
+
+
+
+
+public interface BusinessPartnerDAO {
+
+	public void sendRequest(String sender, String receiver) throws Exception ;
+	public Boolean getSentRequest(String sender, String receiver) throws Exception;
+	
+}
