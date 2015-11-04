@@ -1,0 +1,322 @@
+package com.infy.jcart.web.managedbeans;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
+
+import com.infy.jcart.beans.ProductDetails;
+import com.infy.jcart.beans.Registration;
+import com.infy.jcart.resources.ErrorRedirect;
+import com.infy.jcart.resources.Factory;
+import com.infy.jcart.resources.JCartConfig;
+import com.infy.jcart.resources.JCartLogger;
+
+
+@ManagedBean
+@SessionScoped
+public class AddBusinessPartnerBean {
+	private List<Registration> retalierList;
+	private List<SelectItem> retailers;
+	private Registration retailerInfo;
+	private String message;
+	private String styleClass;
+	private List<ProductDetails> products;
+	private Integer lenProducts;
+	private Set<String> commandTitles;
+	private String selectedRetailerId;
+	
+	
+
+	public String getSelectedRetailerId() {
+		return selectedRetailerId;
+	}
+
+	public void setSelectedRetailerId(String selectedRetailerId) {
+		this.selectedRetailerId = selectedRetailerId;
+	}
+
+	public List<ProductDetails> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<ProductDetails> products) {
+		this.products = products;
+	}
+
+	public Integer getLenProducts() {
+		return lenProducts;
+	}
+
+	public void setLenProducts(Integer lenProducts) {
+		this.lenProducts = lenProducts;
+	}
+
+	public Set<String> getCommandTitles() {
+		return commandTitles;
+	}
+
+	public void setCommandTitles(Set<String> commandTitles) {
+		this.commandTitles = commandTitles;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public String getStyleClass() {
+		return styleClass;
+	}
+
+	public void setStyleClass(String styleClass) {
+		this.styleClass = styleClass;
+	}
+
+	
+	
+	public AddBusinessPartnerBean(){
+		retailerInfo = null;
+		commandTitles = null;
+		message = null;
+		lenProducts = null;
+		
+		
+		HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+		String id = (String) session.getAttribute("userId");
+	
+		retalierList = new ArrayList<Registration>();
+		retailers = new ArrayList<SelectItem>();
+	try{	
+		retalierList = Factory.createGetRetailersService().getAllRetailers();
+		
+		for(Registration r:retalierList){
+			if(!r.getUserId().equals(id))
+				retailers.add(new SelectItem(r.getUserId()));
+		}
+	}  catch (Exception exception) {
+		JCartLogger.logError(this.getClass().getName(), "AddBusinessPartnerBean",
+				exception.toString());
+		
+		if(exception.getMessage().contains("DAO.TECHNICAL_ERROR")){
+			ErrorRedirect.reDirect();
+		}
+		else
+		{
+			styleClass="errorMsg";
+			this.message=JCartConfig.getMessageFromProperties(exception.getMessage());
+		}
+		}
+	}
+	
+	
+	
+	public void getRetailerInfo(ValueChangeEvent vce) {
+		retailerInfo = null;
+		lenProducts = null;
+		products = null;
+		message =null;
+		
+		String retId = (String) vce.getNewValue();
+		retailerInfo =new Registration();
+		
+		/*if(retId=="1"){
+			styleClass="errorMsg";
+			this.message= JCartConfig.getMessageFromProperties("getRetailerInfo.Select_one_retailer");
+		}*/
+		
+		try{
+		
+			
+			if(retId==null)
+			throw new Exception("getRetailerInfo.Select_one_retailer");
+		
+		
+		
+		for(Registration r:retalierList){
+			if(r.getUserId().equals(retId)){
+				retailerInfo.setFirstName(r.getFirstName());
+				retailerInfo.setLastName(r.getLastName());
+				retailerInfo.setPermanentAddress(r.getPermanentAddress());
+				retailerInfo.setGender(r.getGender());
+				retailerInfo.setUserId(r.getUserId());
+				retailerInfo.setList(r.getList());
+				retailerInfo.setDob(r.getDob());
+				retailerInfo.setPhoneNumber(r.getPhoneNumber());
+				retailerInfo.setMessageService(r.getMessageService());
+				retailerInfo.setSelected(r.getSelected());
+				retailerInfo.setShipmentAddress(r.getShipmentAddress());
+			}
+		}
+		}catch(Exception exception){
+			if(exception.getMessage().contains("Select_one_retailer")){
+				styleClass="errorMsg";
+				this.message = JCartConfig.getMessageFromProperties("getRetailerInfo.Select_one_retaile");
+			}
+		}
+	}
+	
+	
+	public String diffProducts(){
+		String ret = "";
+		lenProducts = null;
+		products = null;
+		products = new ArrayList<ProductDetails>();
+		message =null;
+		
+		HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+		String id = (String) session.getAttribute("userId");
+		List<ProductDetails> thisProducts = new ArrayList<ProductDetails>(); 
+		List<ProductDetails> thatProduct = new ArrayList<ProductDetails>();
+		try{	
+			
+			thisProducts = Factory.createGetRetailersService().getRetailerProducts(id);
+			
+			thatProduct = Factory.createGetRetailersService().getRetailerProducts(retailerInfo.getUserId());
+			Integer eqProdCount = 0;
+			Set<String> set = new TreeSet<String>();
+			for(ProductDetails th:thatProduct){
+				Integer flag = 0;
+				
+				for(ProductDetails thi:thisProducts){
+					if(th.getCategory().equals(thi.getCategory())){
+						flag = 1;
+						eqProdCount++;
+					}
+							
+				}
+				
+				if(flag==0){
+					this.products.add(th);
+					message=null;
+					set.add(th.getCategory());
+				}
+			}
+			
+			
+			lenProducts = set.size();
+			
+			commandTitles = new TreeSet<String>();
+			commandTitles= set;
+			
+			if(lenProducts==null){
+				styleClass="errorMsg";
+				this.message = JCartConfig.getMessageFromProperties("diffProducts.NO_PROD_AVAILABLE");
+			}
+			
+			if(thisProducts.size()==eqProdCount){
+				styleClass="errorMsg";
+				this.message = JCartConfig.getMessageFromProperties("diffProducts.NO_EXTRA_PROD");
+			}
+			
+			
+			
+		}
+		 catch (Exception exception) {
+				JCartLogger.logError(this.getClass().getName(), "diffProducts",
+						exception.toString());
+				
+				if(exception.getMessage().contains("DAO.TECHNICAL_ERROR")){
+					ErrorRedirect.reDirect();
+				}
+				else
+				{
+					styleClass="errorMsg";
+					this.message=JCartConfig.getMessageFromProperties(exception.getMessage());
+				}
+		}
+		
+		return ret;
+		
+	}
+	
+	public String sendRequest(){
+		String ret = "";
+		HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+		String id = (String) session.getAttribute("userId");
+		
+		try{	
+			Boolean res = Factory.createBusinessPartnerService().receivedRequests(id, retailerInfo.getUserId());
+			if(!res){
+				Factory.createBusinessPartnerService().sendBusinessRequest(id, retailerInfo.getUserId());
+				styleClass="successMsg";
+				this.message = JCartConfig.getMessageFromProperties("sendRequest.REQ_SENT_SUCCESS");
+			}
+			
+			
+		}  catch (Exception exception) {
+			exception.printStackTrace();
+			JCartLogger.logError(this.getClass().getName(), "sendRequest",
+					exception.toString());
+			
+			if(exception.getMessage().contains("DAO.TECHNICAL_ERROR")){
+				ErrorRedirect.reDirect();
+			}
+				
+			else
+			{
+				styleClass="errorMsg";
+				this.message=JCartConfig.getMessageFromProperties(exception.getMessage());
+			}
+			}
+		return ret;
+		}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public List<Registration> getRetalierList() {
+		return retalierList;
+	}
+
+	public void setRetalierList(List<Registration> retalierList) {
+		this.retalierList = retalierList;
+	}
+
+	public List<SelectItem> getRetailers() {
+		return retailers;
+	}
+
+	public void setRetailers(List<SelectItem> retailers) {
+		this.retailers = retailers;
+	}
+
+	public Registration getRetailerInfo() {
+		return retailerInfo;
+	}
+
+	public void setRetailerInfo(Registration retailerInfo) {
+		this.retailerInfo = retailerInfo;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}
