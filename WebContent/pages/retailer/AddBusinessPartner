@@ -1,0 +1,151 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="f"  uri="http://java.sun.com/jsf/core"%>
+<%@ taglib prefix="h"  uri="http://java.sun.com/jsf/html"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>JCart - Add Business Partner</title>
+<link href="../../page-resources/styles/style.css" media="screen"
+	rel="stylesheet">
+	<f:loadBundle var="lable" basename="com.infy.jcart.resources.Lang"/>
+	
+</head>
+<body>
+<%
+	if(session.getAttribute("userId")==null || session.getAttribute("role").toString().charAt(0)!='R'){
+		response.sendRedirect("../../faces/pages/errorPage.jsp");
+	}
+ %>
+<f:view>
+<jsp:include page="../header.jsp"></jsp:include>
+		
+<h:form prependId="false">
+<center>
+		<div id="container">
+		
+			<!-- Left navigation pane links -->
+		 <div id="menu1">
+			<jsp:include page="RetailerLeftToc.jsp"></jsp:include>
+		</div>
+		<!-- Right navigation pane links -->
+		<div id="menu2">
+			<jsp:include page="RetailerRightToc.jsp"></jsp:include>
+		</div>
+		<!-- Main body page for displaying details -->
+		<div id="page">
+	<h3><h:outputText value="#{lable.Add_Business_Partner}"></h:outputText> </h3><br>
+<br>
+
+	<h:panelGrid columns="2">
+	<h:outputText value="#{lable.Retailer_ID}"></h:outputText>
+	<h:selectOneMenu value="#{addBusinessPartnerBean.selectedRetailerId}" id="buRet" valueChangeListener="#{addBusinessPartnerBean.getRetailerInfo}" onchange="submit();" required="true" requiredMessage="#{lable.req_msg1}">
+			<f:selectItem itemLabel="--#{lable.Select}--"/>
+ 			<f:selectItems value="#{addBusinessPartnerBean.retailers}"/>
+	</h:selectOneMenu>
+	
+	</h:panelGrid>
+	
+	
+	
+	<h:panelGrid border="1" rendered="#{addBusinessPartnerBean.retailerInfo ne null and addBusinessPartnerBean.lenProducts eq null}" columns="2" columnClasses="row1,row2">
+	
+	<f:facet name="header">
+	<h:outputText value="#{lable.Ret_Details}" ></h:outputText>
+	</f:facet>
+	
+	<f:facet name="header">
+	<h:outputText value="" ></h:outputText>
+	</f:facet>
+	<h:outputLabel value="#{lable.First_Name}" ></h:outputLabel>
+	<h:outputText value="#{addBusinessPartnerBean.retailerInfo.firstName}"></h:outputText>
+	
+	<h:outputLabel value="#{lable.Last_Name}"></h:outputLabel>
+	<h:outputText value="#{addBusinessPartnerBean.retailerInfo.lastName}"></h:outputText>
+	
+	<h:outputLabel value="#{lable.Address}"></h:outputLabel>
+	<h:outputText value="#{addBusinessPartnerBean.retailerInfo.permanentAddress}"></h:outputText>
+	
+	<h:outputLabel value="#{lable.Gender}"></h:outputLabel>
+	<h:outputText value="#{addBusinessPartnerBean.retailerInfo.gender}">
+	<f:converter converterId="geCon"/>
+	</h:outputText>
+	</h:panelGrid>
+	<h:commandLink value="#{lable.comp_cat}#{addBusinessPartnerBean.retailerInfo.userId}" rendered="#{addBusinessPartnerBean.retailerInfo ne null and addBusinessPartnerBean.lenProducts eq null}" action="#{addBusinessPartnerBean.diffProducts}"></h:commandLink>
+	<br>
+	<br>
+	<br>
+	
+	<h:commandLink value="#{addBusinessPartnerBean.lenProducts}" title="#{addBusinessPartnerBean.commandTitles}" rendered="#{addBusinessPartnerBean.lenProducts ne null}">&nbsp;</h:commandLink><h:outputText value="#{lable.Extra_cat_available}" rendered="#{addBusinessPartnerBean.lenProducts ne null}"></h:outputText><br><br>
+	
+	
+	
+	
+	
+	<h:dataTable value="#{addBusinessPartnerBean.products}" var="prod" rendered="#{addBusinessPartnerBean.lenProducts ne null}" border="1" rowClasses="row1,row2">
+		
+		<h:column id="id1">
+		<f:facet name="header">
+		<h:outputLabel value="#{lable.Product_ID}"></h:outputLabel>
+		</f:facet>
+		<h:outputText value="#{prod.productId}"></h:outputText>
+		</h:column>
+		
+		<h:column id="id2">
+		<f:facet name="header">
+		<h:outputLabel value="#{lable.Product_Name}"></h:outputLabel>
+		</f:facet>
+		<h:outputText value="#{prod.productName}"></h:outputText>
+		</h:column>
+		
+		<h:column id ="id3">
+		<f:facet name="header">
+		<h:outputLabel value="#{lable.Price}"></h:outputLabel>
+		</f:facet>
+		<h:outputText value="#{prod.price}"></h:outputText>
+		</h:column>
+		
+		<h:column id ="id4">
+		<f:facet name="header">
+		<h:outputLabel value="#{lable.Company}"></h:outputLabel>
+		</f:facet>
+		<h:outputText value="#{prod.company}"></h:outputText>
+		</h:column>
+		
+		<h:column id ="id5">
+		<f:facet name="header">
+		<h:outputLabel value="#{lable.Sub_Category}"></h:outputLabel>
+		</f:facet>
+		<h:outputText value="#{prod.subcategory}"></h:outputText>
+		</h:column>
+		
+	
+	</h:dataTable>
+	
+	<h:commandButton value="#{lable.Send_Business_Request}" action="#{addBusinessPartnerBean.sendRequest}" rendered="#{addBusinessPartnerBean.lenProducts ne null}" styleClass="btn"></h:commandButton>
+	
+	
+	
+	
+	
+	
+	
+
+<br>
+	
+<br>
+
+
+<br>
+	<h:outputText value="#{addBusinessPartnerBean.message}" styleClass="#{addBusinessPartnerBean.styleClass}"></h:outputText><br>
+	</div>
+	</div>
+</center>
+
+</h:form>
+<jsp:include page="../footer.jsp"></jsp:include>
+</f:view>
+</body>
+</html>
